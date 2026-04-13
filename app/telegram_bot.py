@@ -1,4 +1,5 @@
 import os
+import asyncio
 from datetime import time
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -83,7 +84,6 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.close()
 
 async def daily_reminder_callback(context: ContextTypes.DEFAULT_TYPE):
-    """Send reminder to all users."""
     db = SessionLocal()
     habits = crud.get_habits(db)
     for chat_id in user_chat_ids:
@@ -99,20 +99,21 @@ async def daily_reminder_callback(context: ContextTypes.DEFAULT_TYPE):
     db.close()
 
 def run_bot():
-    """Start the Telegram bot with job queue for daily reminders."""
-    application = Application.builder().token(TOKEN).build()
+    # Create a new event loop for this thread
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     
-    # Add handlers
+    application = Application.builder().token(TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("add", add_habit))
     application.add_handler(CommandHandler("habits", list_habits))
     application.add_handler(CommandHandler("checkin", checkin))
     application.add_handler(CallbackQueryHandler(button_callback))
     
-    # Schedule daily reminder at 20:00 (8 PM) local time
+    # Job queue should now work after installing the extra
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_daily(daily_reminder_callback, time=time(hour=20, minute=0))
     
-    # Start polling (blocks)
+    # Run the bot (this blocks)
     application.run_polling()
