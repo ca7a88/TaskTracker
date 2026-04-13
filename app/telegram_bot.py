@@ -115,5 +115,5 @@ def run_bot():
     if job_queue:
         job_queue.run_daily(daily_reminder_callback, time=time(hour=20, minute=0))
     
-    # Run the bot (this blocks)
-    application.run_polling()
+    # Run the bot without signal handlers (since we're in a background thread)
+    application.run_polling(signal_handlers=False)
