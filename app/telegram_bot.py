@@ -110,10 +110,10 @@ def run_bot():
     application.add_handler(CommandHandler("checkin", checkin))
     application.add_handler(CallbackQueryHandler(button_callback))
     
-    # Job queue should now work after installing the extra
+    # Job queue
     job_queue = application.job_queue
     if job_queue:
         job_queue.run_daily(daily_reminder_callback, time=time(hour=20, minute=0))
     
-    # Run the bot without signal handlers (since we're in a background thread)
-    application.run_polling(signal_handlers=False)
+    # Run the bot without signal handlers (pass empty list for stop_signals)
+    application.run_polling(stop_signals=[])
