@@ -1,9 +1,11 @@
+import os
 import streamlit as st
 import requests
 import pandas as pd
 from datetime import date
 
-API_URL = "http://localhost:8000"
+# Read API URL from environment variable, fallback to localhost for development
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.title("TaskTracker Dashboard")
 
@@ -41,4 +43,4 @@ if response.status_code == 200:
     else:
         st.info("No habits yet. Add one from the sidebar.")
 else:
-    st.error("Cannot connect to API. Make sure FastAPI is running on port 8000.")
+    st.error(f"Cannot connect to API at {API_URL}. Make sure FastAPI is running.")
